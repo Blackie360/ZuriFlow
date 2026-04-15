@@ -102,3 +102,76 @@ If you see `Sorry, I couldn't respond right now. Please try again.`:
 - confirm the Gemini API key is valid
 - restart `npm start`
 - check browser console for Gemini API errors (quota, model availability, invalid key)
+
+## Agent Guardrail Snippets
+
+The assistant is intentionally constrained to period and menstrual-health topics.
+
+### 1) System guardrail prompt
+
+```ts
+export const PERIOD_GUARDRAIL_PROMPT = `
+You are Zuri, a menstrual health and period tracking assistant.
+Only support period tracking, menstrual symptoms, cycle irregularities, and PCOS education.
+If off-topic, softly redirect back to period/cycle questions.
+For severe symptoms, respond with empathetic but firm urgent-care guidance.
+Do not provide diagnosis claims or medication dosage instructions.
+`.trim()
+```
+
+### 2) Off-topic soft redirect
+
+```ts
+export function isOffTopicPrompt (text: string) {
+  const normalized = text.toLowerCase()
+  return OFF_TOPIC_KEYWORDS.some((keyword) => normalized.includes(keyword))
+}
+
+if (isOffTopicPrompt(normalizedPrompt)) {
+  this.messages.update((current) => [
+    ...current,
+    {
+      role: 'assistant',
+      text: 'I can best help with period and cycle health. I can help with missed periods, cramps, flow changes, or PCOS questions.'
+    }
+  ])
+  return
+}
+```
+
+### 3) Urgent symptom escalation
+
+```ts
+export function isUrgentPrompt (text: string) {
+  const normalized = text.toLowerCase()
+  return URGENT_KEYWORDS.some((keyword) => normalized.includes(keyword))
+}
+
+const hasUrgentLanguage = /urgent|emergency|immediately|seek care|doctor/i.test(cleanText)
+if (isUrgentPrompt(prompt) && !hasUrgentLanguage) {
+  return `I am sorry you are going through this. Because your symptoms may be serious, please seek urgent in-person medical care now. ${cleanText}`
+}
+```
+
+### 4) Model configuration
+
+```ts
+private model = this.genAI.getGenerativeModel({
+  model: 'gemini-2.5-flash',
+  systemInstruction: PERIOD_GUARDRAIL_PROMPT
+})
+```
+
+## Tracker Data Shape Snippet
+
+This is the shape currently used by the tracker log entries:
+
+```ts
+const newEntry = {
+  start,
+  end,
+  notes,
+  intensity: this.intensity(),
+  symptoms: this.selectedSymptoms()
+}
+```

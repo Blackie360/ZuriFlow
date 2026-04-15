@@ -1,9 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Navbar } from './navbar/navbar'; 
-import { Home } from './home/home';
-import { HowItWorks } from './how-it-works/how-it-works';
-import { FinalCta } from './final-cta/final-cta';
 import { Footer } from './footer/footer';
 
 @Component({
@@ -12,9 +9,6 @@ import { Footer } from './footer/footer';
   imports: [
     RouterOutlet, 
     Navbar, 
-    Home,
-    HowItWorks,
-    FinalCta,
     Footer
   ],
   templateUrl: './app.html',

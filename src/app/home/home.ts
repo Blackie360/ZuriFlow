@@ -1,9 +1,16 @@
 import { Component, signal } from '@angular/core';
+import { HowItWorks } from '../how-it-works/how-it-works';
+import { FinalCta } from '../final-cta/final-cta';
 import { Chat } from '../chat/chat';
 
 @Component({
   selector: 'app-home',
-  imports: [Chat],
+  standalone: true,
+  imports: [
+    HowItWorks, 
+    FinalCta, 
+    Chat
+  ],
   templateUrl: './home.html',
   styleUrl: './home.css',
 })

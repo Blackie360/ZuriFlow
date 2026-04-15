@@ -1,16 +1,18 @@
 import { Injectable, inject } from '@angular/core';
-import {
-  Firestore,
-  collection,
-  addDoc,
-  collectionData,
-  query,
-  orderBy,
-  Timestamp
-} from '@angular/fire/firestore';
+/** * CRITICAL: All these must come from @angular/fire/firestore 
+ * to match the instance provided in app.config.ts
+ */
+import { 
+  Firestore, 
+  collection, 
+  addDoc, 
+  collectionData, 
+  query, 
+  orderBy, 
+  Timestamp 
+} from '@angular/fire/firestore'; 
 import { Observable } from 'rxjs';
 
-/** Strong typing for your data */
 export interface PeriodEntry {
   start: string;
   end: string;
@@ -26,25 +28,25 @@ export interface PeriodEntry {
 })
 export class LogData {
   private firestore = inject(Firestore);
+  
+  // We pass 'this.firestore' to ensure the collection uses the correct SDK instance
   private logCollection = collection(this.firestore, 'period-logs');
 
-  /** SAVE to Firebase */
   async savePeriodEntry(entry: PeriodEntry): Promise<void> {
     try {
       await addDoc(this.logCollection, {
         ...entry,
-        timestamp: Timestamp.now() // ✅ better than new Date()
+        timestamp: Timestamp.now() 
       });
-    } catch (error) {
-      console.error("Error saving log to Firebase:", error);
+    } catch (error: any) {
+      console.error("Error saving log:", error);
       throw error;
     }
   }
 
-  /** GET from Firebase */
   getLogs(): Observable<PeriodEntry[]> {
+    // Ensure 'query' and 'orderBy' are also from @angular/fire/firestore
     const q = query(this.logCollection, orderBy('timestamp', 'desc'));
-
     return collectionData(q, { idField: 'id' }) as Observable<PeriodEntry[]>;
   }
 }
